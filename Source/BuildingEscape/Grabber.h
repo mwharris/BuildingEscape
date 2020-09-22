@@ -24,12 +24,14 @@ protected:
 
 private:
 	float Reach = 100.f;
-	APlayerController* PlayerController;
-	UPhysicsHandleComponent* PhysicsHandle = nullptr;
-	UInputComponent* Input = nullptr;
-
+	APlayerController* PlayerController = nullptr;
 	FVector ViewLocation;
 	FRotator ViewRotation;
+
+	UPROPERTY()
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UPROPERTY()
+	UInputComponent* Input = nullptr;
 
 	void FindPhysicsHandle();
 	void SetupInputComponent();

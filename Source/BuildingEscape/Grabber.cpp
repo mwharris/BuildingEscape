@@ -55,7 +55,7 @@ void UGrabber::SetupInputComponent()
 void UGrabber::Grab()
 {
 	FHitResult Hit = GetFirstPhysicsBodyWithinReach();
-	if (Hit.GetActor()) 
+	if (PhysicsHandle && Hit.GetActor()) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Grabbed %s!"), *Hit.GetActor()->GetName());
 		PhysicsHandle->GrabComponentAtLocation(Hit.GetComponent(), NAME_None, Hit.Location);
@@ -65,7 +65,7 @@ void UGrabber::Grab()
 // Called when we release the Grab button
 void UGrabber::Release()
 {
-	if (PhysicsHandle->GrabbedComponent) 
+	if (PhysicsHandle && PhysicsHandle->GrabbedComponent) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Released %s!"), *PhysicsHandle->GetName());
 		PhysicsHandle->ReleaseComponent();
@@ -76,12 +76,13 @@ void UGrabber::Release()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// Get the player's view point location and rotation
-	PlayerController->GetPlayerViewPoint(OUT ViewLocation, OUT ViewRotation);
-
+	if (PlayerController) 
+	{
+		PlayerController->GetPlayerViewPoint(OUT ViewLocation, OUT ViewRotation);
+	}
 	// If our Physics handle is grabbing a component
-	if (PhysicsHandle->GrabbedComponent) 
+	if (PhysicsHandle && PhysicsHandle->GrabbedComponent) 
 	{
 		// Set the grabbed component's location
 		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
@@ -92,19 +93,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 FHitResult UGrabber::GetFirstPhysicsBodyWithinReach() const
 {
 	FVector LineTraceEnd = GetLineTraceEnd();
-
-	// Draw a line so we can visualize in-editor
-	DrawDebugLine(
-		GetWorld(),
-		ViewLocation,
-		LineTraceEnd,
-		FColor(0, 255, 0),
-		false,
-		0.f,
-		0,
-		5.f
-	);
-
+	
 	// Perform the raycast
 	FHitResult Hit;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
